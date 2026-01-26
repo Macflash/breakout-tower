@@ -21,7 +21,7 @@ export function useTick<TState>(
       const currentTime = performance.now();
       const deltaTime = currentTime - lastTick;
       const ticksToDo = deltaTime / targetTickSpeed;
-      if (ticksToDo > 1) console.log(ticksToDo);
+      //   if (ticksToDo > 1) console.log(ticksToDo);
 
       let currentState = { ...state };
       for (let i = 0; i < ticksToDo; i++) {

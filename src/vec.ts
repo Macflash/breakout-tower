@@ -24,8 +24,13 @@ export function angle(v: Vec): number {
 }
 
 /** @returns angle of a vector in radians */
-export function fromCueAngle(dirDegrees: number, speed: number): Vec {
+export function fromDegree(dirDegrees: number, speed: number): Vec {
   const radians = ((90 - dirDegrees) * Math.PI) / 180;
+  return fromAngle(radians, speed);
+}
+
+/** @returns angle of a vector in radians */
+export function fromAngle(radians: number, speed: number): Vec {
   return vec(speed * Math.cos(radians), -speed * Math.sin(radians));
 }
 

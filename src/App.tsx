@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { add, Vec, vec } from "./vec";
+import { add, fromAngle, magnitude, scale, Vec, vec } from "./vec";
 import { useTick } from "./useTick";
 
 function clamp(n: number, min: number, max: number): number {
@@ -16,6 +16,10 @@ interface Box {
 
 function box(s = vec(), p = vec(), color?: string) {
   return { s, p, color };
+}
+
+function center(box: Box): Vec {
+  return add(box.p, scale(box.s, 0.5));
 }
 
 interface Ball extends Box {
@@ -57,7 +61,7 @@ function makeLevel(): Level {
     ),
     ball: {
       ...box(vec(10, 10), vec(LEVEL_SIZE.x / 2, LEVEL_SIZE.y / 2)),
-      v: vec(-1, -2),
+      v: vec(0, 2),
     },
     blocks: [],
   };
@@ -76,13 +80,35 @@ function App() {
     ball.p.x = clamp(ball.p.x, 0, maxBallX);
 
     const maxBallY = level.s.y - ball.s.y;
-    if (ball.p.y < 0 || ball.p.y > maxBallY) ball.v.y *= -1;
+    if (ball.p.y < 0) ball.v.y *= -1;
+
+    if (ball.p.y > maxBallY) {
+      ball.v = vec(0, -3);
+    }
+
     ball.p.y = clamp(ball.p.y, 0, maxBallY);
 
     // Intersect with paddle
     if (intersect(ball, paddle)) {
       ball.color = "red";
-      // figure out the ANGLE thingy.
+      // Remove collision
+      ball.p.y = paddle.p.y - ball.s.y;
+
+      // ok, figure out what the angle should be
+      const bc = center(ball);
+      const pc = center(paddle);
+
+      const offset = (2.5 * (bc.x - pc.x)) / paddle.s.x;
+      // convert to like.. ANGLE? 0 to 180
+      console.log("hit", offset);
+
+      const ballV = magnitude(ball.v);
+
+      ball.v = fromAngle(Math.PI / 2 - offset, ballV + 0.5);
+
+      // middle should be STRAIGHT, sides should be really angled.
+      // but scaled to the width of the paddle.
+      // maybe -1 to 1.
     } else ball.color = "green";
 
     return level;
