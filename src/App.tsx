@@ -130,13 +130,9 @@ function App() {
           state.s.x - state.paddle.s.x,
         );
 
-        setState({
-          ...state,
-          paddle: {
-            ...state.paddle,
-            p: { ...state.paddle.p, x }, // Could allow for SOME y control.
-          },
-        });
+        console.log("MOUSE!", x);
+        state.paddle.p.x = x;
+        setState(state);
       }}
     >
       <BoxEl box={state.paddle} />
