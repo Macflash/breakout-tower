@@ -26,6 +26,10 @@ interface Ball extends Box {
   v: Vec;
 }
 
+interface Block extends Box {
+  hp: number;
+}
+
 function intersect(a: Box, b: Box): boolean {
   const a1 = a.p;
   const a2 = add(a.p, a.s);
@@ -44,7 +48,7 @@ interface Level {
   s: Vec;
   paddle: Box;
 
-  blocks: Box[];
+  blocks: Block[];
 
   ball: Ball;
 }
@@ -53,6 +57,17 @@ const LEVEL_SIZE = vec(600, 600);
 const PADDLE_SIZE = vec(100, 20);
 
 function makeLevel(): Level {
+  const blocks: Block[] = [];
+  const rows = 10;
+  const cols = 11;
+  const w = 50;
+  const h = 20;
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      blocks.push({ ...box(vec(w, h), vec(j * (w + 2), i * (h + 2))), hp: 1 });
+    }
+  }
+
   return {
     s: { ...LEVEL_SIZE },
     paddle: box(
@@ -63,7 +78,7 @@ function makeLevel(): Level {
       ...box(vec(10, 10), vec(LEVEL_SIZE.x / 2, LEVEL_SIZE.y / 2)),
       v: vec(0, 2),
     },
-    blocks: [],
+    blocks,
   };
 }
 
@@ -72,7 +87,7 @@ const l = makeLevel();
 function App() {
   const { state, setState } = useTick<Level>(l, (level) => {
     // Move ball
-    const { ball, paddle } = level;
+    const { ball, paddle, blocks } = level;
     ball.p = add(ball.p, ball.v);
 
     const maxBallX = level.s.x - ball.s.x;
@@ -111,6 +126,14 @@ function App() {
       // maybe -1 to 1.
     } else ball.color = "green";
 
+    for (const block of blocks) {
+      if (block.hp <= 0) continue;
+
+      if (intersect(ball, block)) {
+        block.hp -= 1;
+      }
+    }
+
     return level;
   });
 
@@ -137,6 +160,10 @@ function App() {
     >
       <BoxEl box={state.paddle} />
       <BoxEl box={state.ball} />
+
+      {state.blocks.map((box, index) =>
+        box.hp > 0 ? <BoxEl box={box} key={index} /> : undefined,
+      )}
     </div>
   );
 }
